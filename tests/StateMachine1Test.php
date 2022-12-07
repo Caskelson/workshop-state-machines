@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\App;
 
+use App\GreenState;
+use App\RedState;
 use App\TrafficLightStateMachine;
+use App\YellowState;
 use Nyholm\NSA;
 use PHPUnit\Framework\TestCase;
 
@@ -13,7 +16,7 @@ class StateMachine1Test extends TestCase
     /**
      * @dataProvider canProvider
      */
-    public function testCan(string $currentState, string $transition, bool $result)
+    public function testCan($currentState, string $transition, bool $result)
     {
         $sm = new TrafficLightStateMachine();
 
@@ -28,7 +31,7 @@ class StateMachine1Test extends TestCase
     /**
      * @dataProvider applyProvider
      */
-    public function testApply(string $currentState, string $newState, string $exception = null)
+    public function testApply($currentState, $newState, string $exception = null)
     {
         $sm = new TrafficLightStateMachine();
         if (null !== $exception) {
@@ -42,37 +45,34 @@ class StateMachine1Test extends TestCase
         }
     }
 
-
-
     public function canProvider()
     {
         return [
-            ['green', 'to_green', false],
-            ['green', 'to_yellow', true],
-            ['green', 'to_red', false],
-            ['yellow', 'to_green', true],
-            ['yellow', 'to_yellow', false],
-            ['yellow', 'to_red', true],
-            ['red', 'to_green', false],
-            ['red', 'to_yellow', true],
-            ['red', 'to_red', false],
-            ['red', 'foobar', false],
+            [new GreenState(), 'to_green', false],
+            [new GreenState(), 'to_yellow', true],
+            [new GreenState(), 'to_red', false],
+            [new YellowState(), 'to_green', true],
+            [new YellowState(), 'to_yellow', false],
+            [new YellowState(), 'to_red', true],
+            [new RedState(), 'to_green', false],
+            [new RedState(), 'to_yellow', true],
+            [new RedState(), 'to_red', false],
+            [new RedState(), 'foobar', false],
         ];
     }
 
     public function applyProvider()
     {
         return [
-            ['green', 'green', \InvalidArgumentException::class],
-            ['green', 'yellow'],
-            ['green', 'red', \InvalidArgumentException::class],
-            ['yellow', 'green'],
-            ['yellow', 'yellow', \InvalidArgumentException::class],
-            ['yellow', 'red'],
-            ['red', 'green', \InvalidArgumentException::class],
-            ['red', 'yellow'],
-            ['red', 'red', \InvalidArgumentException::class],
-            ['red', 'foobar', \InvalidArgumentException::class],
+            [new GreenState(), new GreenState(), \InvalidArgumentException::class],
+            [new GreenState(), new YellowState()],
+            [new GreenState(), new RedState(), \InvalidArgumentException::class],
+            [new YellowState(), new GreenState()],
+            [new YellowState(), new YellowState(), \InvalidArgumentException::class],
+            [new YellowState(), new RedState()],
+            [new RedState(), new GreenState(), \InvalidArgumentException::class],
+            [new RedState(), new YellowState()],
+            [new RedState(), new RedState(), \InvalidArgumentException::class],
         ];
     }
 }
