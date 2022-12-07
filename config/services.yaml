@@ -23,6 +23,11 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    state_machine.traffic_light_php:
+        public: true
+        class: Symfony\Component\Workflow\StateMachine
+        factory: [ App\Workflow\TrafficLightFactory, create ]
+
 sensio_framework_extra:
     router:
         annotations: false
